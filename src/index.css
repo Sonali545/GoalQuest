@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Outfit", serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  --color-brand-navy: #0f172a;
+  --color-brand-deep: #f1f5f9;
+  --color-brand-border: #e2e8f0;
+  --color-brand-violet: #6366f1;
+  --color-brand-cyan: #38bdf8;
+  --color-brand-lavender: #f1f5f9;
+  --color-brand-pink: #f472b6;
+}
+
+@layer base {
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+  body {
+    @apply bg-brand-deep text-brand-navy font-sans antialiased transition-colors duration-300;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white border border-slate-200 shadow-sm transition-all;
+  }
+
+  .glass-card-hover {
+    @apply hover:shadow-xl hover:shadow-brand-violet/5 hover:-translate-y-1 transition-all duration-300;
+  }
+
+  .glow-border {
+    @apply border border-slate-200 hover:border-brand-violet/40 shadow-sm transition-all duration-300;
+  }
+
+  .mesh-gradient {
+    @apply transition-all duration-700;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(129, 140, 248, 0.06) 0, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(244, 114, 182, 0.06) 0, transparent 50%),
+      radial-gradient(at 50% 100%, rgba(147, 197, 253, 0.06) 0, transparent 50%);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 20px rgba(129, 140, 248, 0.15);
+  }
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

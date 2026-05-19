@@ -1,0 +1,146 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // HELPER FUNCTIONS
+    function isSignedIn() { return request.auth != null; }
+    function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function getUserData(userId) { return get(/databases/$(database)/documents/users/$(userId)).data; }
+    function getMyData() { return getUserData(request.auth.uid); }
+    function isRole(role) { 
+      return isSignedIn() && (
+        getMyData().role == role || 
+        (role == 'admin' && request.auth.token.email == "sonalikam05@gmail.com")
+      ); 
+    }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    // VALIDATION BLUEPRINTS
+    function isValidUser(data) {
+      return data.keys().hasAll(['name', 'email', 'role']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.email is string && data.email.matches('^.+@.+$') &&
+             data.role in ['employee', 'manager', 'admin'];
+    }
+
+    function isValidGoalSheet(data) {
+      return data.keys().hasAll(['employeeId', 'managerId', 'cycleId', 'status', 'isLocked']) &&
+             isValidId(data.employeeId) &&
+             isValidId(data.managerId) &&
+             data.status in ['draft', 'pending', 'approved', 'returned'] &&
+             data.isLocked is bool;
+    }
+
+    function isValidGoal(data) {
+      return data.keys().hasAll(['sheetId', 'employeeId', 'managerId', 'thrustArea', 'title', 'uom', 'target', 'weightage', 'description', 'createdAt']) &&
+             isValidId(data.sheetId) &&
+             isValidId(data.managerId) &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.description is string && data.description.size() <= 1000 &&
+             data.weightage is number && data.weightage >= 1 && data.weightage <= 100 &&
+             data.uom in ['numeric', 'percentage', 'timeline', 'zero'];
+    }
+
+    // ENTITY RULES
+
+    // Users: Profiles and Metadata
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isRole('admin') || isRole('manager');
+      allow create: if isSignedIn() && isOwner(userId) && isValidUser(incoming());
+      allow update: if isSignedIn() && (
+        (isRole('admin') && incoming().diff(existing()).affectedKeys().hasOnly(['role', 'department', 'managerId', 'performanceScore'])) ||
+        (isOwner(userId) && incoming().diff(existing()).affectedKeys().hasOnly(['name']) && incoming().role == existing().role)
+      );
+    }
+
+    // GoalSheets: The Master Container
+    match /goalSheets/{sheetId} {
+      allow get: if isSignedIn() && (isOwner(resource.data.employeeId) || isOwner(resource.data.managerId) || isRole('admin'));
+      allow list: if isSignedIn() && (isOwner(resource.data.employeeId) || isOwner(resource.data.managerId) || isRole('admin'));
+      
+      allow create: if isSignedIn() && isOwner(incoming().employeeId) && isValidGoalSheet(incoming());
+      
+      allow update: if isSignedIn() && (
+        // Action: Employee Submit or Edit Draft (allow any field except locked ones)
+        (isOwner(existing().employeeId) && existing().isLocked == false && 
+         isValidGoalSheet(incoming()) && 
+         incoming().employeeId == existing().employeeId) ||
+        
+        // Action: Manager Approve/Return
+        (isOwner(existing().managerId) && 
+         incoming().diff(existing()).affectedKeys().hasAny(['status', 'isLocked', 'managerComments']) && isValidGoalSheet(incoming())) ||
+        
+        // Action: Admin Emergency Unlock
+        (isRole('admin'))
+      );
+    }
+
+    // Goals: Individual Items
+    match /goals/{goalId} {
+      allow read: if isSignedIn() && (
+        isOwner(resource.data.employeeId) || 
+        isOwner(resource.data.managerId) ||
+        isRole('admin')
+      );
+      
+      allow create: if isSignedIn() && isOwner(incoming().employeeId) && 
+                    get(/databases/$(database)/documents/goalSheets/$(incoming().sheetId)).data.isLocked == false &&
+                    isValidGoal(incoming());
+      
+      allow update: if isSignedIn() && (
+        // Recipient of a shared goal can only edit weightage
+        (existing().isShared == true && isOwner(existing().employeeId) && 
+         incoming().diff(existing()).affectedKeys().hasOnly(['weightage']) && 
+         get(/databases/$(database)/documents/goalSheets/$(existing().sheetId)).data.isLocked == false) ||
+        
+        // Regular goal owner
+        (existing().isShared == false && isOwner(existing().employeeId) && 
+         get(/databases/$(database)/documents/goalSheets/$(existing().sheetId)).data.isLocked == false && isValidGoal(incoming())) ||
+        
+        // Manager inline edit
+        (isOwner(get(/databases/$(database)/documents/goalSheets/$(existing().sheetId)).data.managerId)) ||
+        
+        isRole('admin')
+      );
+
+      allow delete: if isSignedIn() && isOwner(existing().employeeId) && 
+                    get(/databases/$(database)/documents/goalSheets/$(existing().sheetId)).data.isLocked == false;
+    }
+
+    // Checkins: Quarterly Updates
+    match /checkins/{checkinId} {
+      allow read: if isSignedIn() && (
+        isOwner(resource.data.employeeId) || 
+        isOwner(resource.data.managerId) ||
+        isRole('admin')
+      );
+      allow create: if isSignedIn() && isOwner(incoming().employeeId) &&
+                    get(/databases/$(database)/documents/goals/$(incoming().goalId)).data.employeeId == request.auth.uid;
+      allow update: if isSignedIn() && (
+        (isOwner(existing().employeeId) && incoming().diff(existing()).affectedKeys().hasOnly(['actual', 'status', 'progressScore', 'employeeComment', 'updatedAt'])) ||
+        (isRole('manager') && incoming().diff(existing()).affectedKeys().hasOnly(['managerComment', 'updatedAt'])) ||
+        isRole('admin')
+      );
+    }
+
+    // AuditLogs
+    match /auditLogs/{logId} {
+      allow list: if isRole('admin');
+      allow create: if isSignedIn();
+    }
+
+    // Config
+    match /config/{configId} {
+      allow read: if isSignedIn();
+      allow write: if isRole('admin');
+    }
+  }
+}

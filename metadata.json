@@ -1,0 +1,6 @@
+{
+  "name": "GoalQuest",
+  "description": "AI-Assisted Smart Goal Intelligence Platform with full goal lifecycle management, quarterly check-ins, and performance analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

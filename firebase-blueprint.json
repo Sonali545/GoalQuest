@@ -1,0 +1,98 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with role-based access",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["employee", "manager", "admin"] },
+        "managerId": { "type": "string", "description": "UID of the L1 manager" },
+        "department": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "role"]
+    },
+    "GoalSheet": {
+      "title": "Goal Sheet",
+      "description": "A collection of goals for a specific employee and cycle",
+      "type": "object",
+      "properties": {
+        "employeeId": { "type": "string" },
+        "managerId": { "type": "string" },
+        "cycleId": { "type": "string", "description": "e.g., 2024-Phase1" },
+        "status": { "type": "string", "enum": ["draft", "pending", "approved", "returned"] },
+        "isLocked": { "type": "boolean" },
+        "totalWeightage": { "type": "number", "description": "Must sum to 100" },
+        "submittedAt": { "type": "string", "format": "date-time" },
+        "approvedAt": { "type": "string", "format": "date-time" },
+        "managerComments": { "type": "string" }
+      }
+    },
+    "Goal": {
+      "title": "Goal",
+      "description": "Individual goal item",
+      "type": "object",
+      "properties": {
+        "sheetId": { "type": "string" },
+        "employeeId": { "type": "string" },
+        "thrustArea": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "uom": { "type": "string", "enum": ["numeric", "percentage", "timeline", "zero"] },
+        "target": { "type": "string" },
+        "weightage": { "type": "number" },
+        "isShared": { "type": "boolean" },
+        "primaryOwnerId": { "type": "string", "description": "For shared goals" }
+      }
+    },
+    "CheckIn": {
+      "title": "Check-in",
+      "description": "Quarterly progress update",
+      "type": "object",
+      "properties": {
+        "goalId": { "type": "string" },
+        "employeeId": { "type": "string" },
+        "quarter": { "type": "string", "enum": ["Q1", "Q2", "Q3", "Q4"] },
+        "actual": { "type": "string" },
+        "status": { "type": "string", "enum": ["Not Started", "On Track", "Completed"] },
+        "progressScore": { "type": "number" },
+        "employeeComment": { "type": "string" },
+        "managerComment": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "AuditLog": {
+      "title": "Audit Log",
+      "description": "System audit trail",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "action": { "type": "string" },
+        "entityId": { "type": "string" },
+        "oldValue": { "type": "object" },
+        "newValue": { "type": "object" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "unlockedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "AppConfig": {
+      "title": "App Config",
+      "description": "Global application configuration",
+      "type": "object",
+      "properties": {
+        "activeCycle": { "type": "string" },
+        "currentQuarter": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "users": { "schema": "User", "description": "Registered users" },
+    "goalSheets": { "schema": "GoalSheet", "description": "Employee goal sheets" },
+    "goals": { "schema": "Goal", "description": "Individual goals" },
+    "checkins": { "schema": "CheckIn", "description": "Quarterly check-ins" },
+    "auditLogs": { "schema": "AuditLog", "description": "System-wide activity logs" },
+    "config": { "schema": "AppConfig", "description": "Global settings (singleton)" }
+  }
+}
