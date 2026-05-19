@@ -6,23 +6,17 @@ GoalQuest is a modern AI-powered enterprise goal setting and performance trackin
 
 Built for AtomQuest Hackathon 2026, the platform transforms traditional KPI and goal management into an intelligent, responsive, and audit-ready digital experience.
 
----
 
 ## Live Demo
 
-Frontend Landing Page
-[GoalQuest Landing Page](https://goal-quest-2all.vercel.app?utm_source=chatgpt.com)
-
 Hosted Platform
-[GoalQuest Live Demo](https://goalquest-4v4r.onrender.com/?utm_source=chatgpt.com)
+[GoalQuest Landing Page](https://goal-quest-2all.vercel.app/)
 
----
 
 ## GitHub Repository
 
-[GoalQuest Repository](https://github.com/Sonali545/GoalQuest?utm_source=chatgpt.com)
+[GoalQuest Repository](https://github.com/Sonali545/GoalQuest)
 
----
 
 ## Problem Statement
 
@@ -37,7 +31,6 @@ GoalQuest addresses these challenges through a centralized AI-assisted portal en
 • AI-powered strategic insights
 • Intelligent risk analysis and progress forecasting
 
----
 
 ## Key Features
 
@@ -83,7 +76,6 @@ GoalQuest addresses these challenges through a centralized AI-assisted portal en
 • Glassmorphism and immersive visuals
 • Role-based workflows
 
----
 
 ## Technology Stack
 
@@ -109,7 +101,6 @@ Authentication
 Version Control
 • GitHub
 
----
 
 ## Architecture Overview
 
@@ -147,7 +138,6 @@ Render & Vercel Deployment
 • Access governance analytics
 • Audit organizational performance
 
----
 
 ## Demo Credentials
 
@@ -163,7 +153,6 @@ Email: [manager@goalquest.ai](mailto:manager@goalquest.ai)
 
 Email: [admin@goalquest.ai](mailto:admin@goalquest.ai)
 
----
 
 ## Highlights
 
@@ -174,17 +163,10 @@ Email: [admin@goalquest.ai](mailto:admin@goalquest.ai)
 • Intelligent performance assistance powered by Gemini AI
 • Designed as an individual hackathon project submission
 
----
 
 ## Developed By
 
 Sonali Kamble
-BE Information Technology Engineering Student
-PICT Pune
-
----
-
-## Hackathon Submission
 
 AtomQuest Hackathon 2026
 Problem Statement: In-House Goal Setting & Tracking Portal
