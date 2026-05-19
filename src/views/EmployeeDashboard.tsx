@@ -403,11 +403,11 @@ export default function EmployeeDashboard({ activeView }: { activeView?: string 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
                   <div className="bg-white border border-slate-200 shadow-sm p-6 sm:p-8 rounded-[32px] space-y-4">
                     <div className="flex items-center justify-between">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Total Objectives</p>
-                      <Target className="w-4 h-4 text-slate-300" />
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Total Objectives</p>
+                      <Target className="w-4 h-4 text-slate-400" />
                     </div>
                     <div className="space-y-1">
-                      <h2 className="text-3xl sm:text-4xl font-serif font-bold text-slate-900">{goals.length} <span className="text-lg sm:text-xl font-normal text-slate-200">/ 8</span></h2>
+                      <h2 className="text-3xl sm:text-4xl font-serif font-bold text-slate-900">{goals.length} <span className="text-lg sm:text-xl font-normal text-slate-300">/ 8</span></h2>
                       <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
                         <motion.div initial={{ width: 0 }} animate={{ width: `${(goals.length / 8) * 100}%` }} className="h-full bg-brand-violet" />
                       </div>
@@ -416,12 +416,12 @@ export default function EmployeeDashboard({ activeView }: { activeView?: string 
   
                   <div className="bg-white border border-slate-200 shadow-sm p-6 sm:p-8 rounded-[32px] space-y-4">
                     <div className="flex items-center justify-between">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Strategic Weight</p>
-                      <Calculator className="w-4 h-4 text-slate-300" />
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Strategic Weight</p>
+                      <Calculator className="w-4 h-4 text-slate-400" />
                     </div>
                     <div className="space-y-1">
                       <h2 className={cn("text-3xl sm:text-4xl font-serif font-bold", totalWeight > 100 ? "text-rose-500" : "text-slate-900")}>
-                        {totalWeight}% <span className="text-lg sm:text-xl font-normal text-slate-200">/ 100</span>
+                        {totalWeight}% <span className="text-lg sm:text-xl font-normal text-slate-300">/ 100</span>
                       </h2>
                       <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
                         <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(totalWeight, 100)}%` }} className={cn("h-full", totalWeight > 100 ? "bg-rose-500" : "bg-brand-cyan")} />
@@ -433,7 +433,7 @@ export default function EmployeeDashboard({ activeView }: { activeView?: string 
                 {/* Goal List */}
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
-                     <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 ml-2">Your Strategy</h3>
+                     <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-2">Your Strategy</h3>
                      {!sheet?.isLocked && (
                        <button onClick={() => setIsAdding(true)} className="text-brand-violet font-bold text-[10px] uppercase tracking-widest flex items-center space-x-1 hover:translate-x-1 transition-transform">
                          <span>Add Goal</span>

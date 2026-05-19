@@ -3,9 +3,10 @@ import { collection, query, onSnapshot, getDocs, doc, setDoc, updateDoc, serverT
 import { db } from "../lib/firebase";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
-import { Settings, Users, ShieldCheck, Activity, TrendingUp, AlertTriangle, Database, Cloud, FileText, BarChart3, PieChart as PieChartIcon, Lock, Unlock, ChevronRight, X } from "lucide-react";
+import { Settings, Users, ShieldCheck, Activity, TrendingUp, AlertTriangle, Database, Cloud, FileText, BarChart3, PieChart as PieChartIcon, Lock, Unlock, ChevronRight, X, Sparkles, RefreshCw } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "../lib/utils";
+import { seedDemoData } from "../lib/seed";
 
 const performanceData = [
   { name: 'Jan', value: 45 },
@@ -23,6 +24,21 @@ export default function AdminDashboard({ activeView }: { activeView?: string }) 
   const [activeTab, setActiveTab] = useState<"analytics" | "audit" | "cycles" | "users">("analytics");
   const [config, setConfig] = useState<any>(null);
   const [users, setUsers] = useState<any[]>([]);
+  const [isSeeding, setIsSeeding] = useState(false);
+
+  const handleSeedData = async () => {
+    if (!confirm("This will populate your database with sample goals, users, and progress. Continue?")) return;
+    setIsSeeding(true);
+    try {
+      await seedDemoData();
+      alert("Demo data successfully synchronized with strategic vault.");
+    } catch (e) {
+      console.error(e);
+      alert("Failed to synchronize demo data.");
+    } finally {
+      setIsSeeding(false);
+    }
+  };
 
   useEffect(() => {
     if (activeView === "dashboard") {
@@ -152,7 +168,10 @@ export default function AdminDashboard({ activeView }: { activeView?: string }) 
         "Goal Count": (s.goals || []).length,
         "Total Weight": (s.goals || []).reduce((sum: number, g: any) => sum + (g.weightage || 0), 0) + "%",
         "Submitted At": s.submittedAt ? new Date(s.submittedAt.seconds * 1000).toLocaleString() : "N/A",
-        "Finalized At": (s.approvedAt || s.returnedAt) ? new Date((s.approvedAt || s.returnedAt).seconds * 1000).toLocaleString() : "N/A"
+        "Finalized At": (s.approvedAt || s.returnedAt) ? new Date((s.approvedAt || s.returnedAt).seconds * 1000).toLocaleString() : "N/A",
+        "Cycle ID": s.cycleId || "N/A",
+        "Manager Name": getManagerName(s.managerId),
+        "Manager UID": s.managerId
       }));
       filename = `strategic_audit_report_${new Date().toISOString().split('T')[0]}.csv`;
     } else if (activeTab === "users") {
@@ -162,7 +181,9 @@ export default function AdminDashboard({ activeView }: { activeView?: string }) 
         "System Role": (u.role || "employee").toUpperCase(),
         "Department": u.department || "General Operations",
         "Direct Manager": u.managerId ? getManagerName(u.managerId) : "None",
-        "User UID": u.id
+        "Manager ID": u.managerId || "N/A",
+        "User UID": u.id,
+        "Created At": u.createdAt ? new Date(u.createdAt.seconds * 1000).toLocaleString() : "N/A"
       }));
       filename = `organization_hierarchy_export_${new Date().toISOString().split('T')[0]}.csv`;
     } else if (activeTab === "analytics") {
@@ -231,7 +252,7 @@ export default function AdminDashboard({ activeView }: { activeView?: string }) 
           <h1 className="text-4xl font-serif font-black tracking-tight text-brand-navy leading-none">
             Governance <span className="text-brand-violet">Console</span>
           </h1>
-          <p className="text-brand-navy/30 font-medium text-sm">Global oversight and infrastructure management.</p>
+          <p className="text-brand-navy/60 font-medium text-sm">Global oversight and infrastructure management.</p>
         </div>
         
         <div className="flex items-center gap-4">
@@ -247,13 +268,21 @@ export default function AdminDashboard({ activeView }: { activeView?: string }) 
                 onClick={() => setActiveTab(tab.id as any)}
                 className={cn(
                   "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap", 
-                  activeTab === tab.id ? "bg-brand-lavender text-brand-violet shadow-sm" : "text-brand-navy/30 hover:text-brand-navy"
+                  activeTab === tab.id ? "bg-brand-lavender text-brand-violet shadow-sm" : "text-brand-navy/60 hover:text-brand-navy"
                 )}
               >
                 {tab.label}
               </button>
             ))}
           </div>
+          <button 
+            onClick={handleSeedData}
+            disabled={isSeeding}
+            className="bg-brand-violet text-white px-6 py-2.5 rounded-xl flex items-center space-x-2 text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg active:scale-95 shadow-brand-violet/20"
+          >
+             {isSeeding ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+             <span>{isSeeding ? "Seeding..." : "Seed Demo"}</span>
+          </button>
           <button 
             onClick={handleExport}
             className="bg-brand-navy text-white px-8 py-2.5 rounded-xl flex items-center space-x-2 text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg active:scale-95 shadow-brand-navy/20"
@@ -338,8 +367,8 @@ export default function AdminDashboard({ activeView }: { activeView?: string }) 
       {activeTab === "audit" && (
         <div className="space-y-6">
           <div className="flex items-center justify-between px-2">
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-brand-navy/30">System Audit</h3>
-            <div className="text-[9px] font-black text-brand-navy/20 uppercase tracking-widest bg-brand-deep px-3 py-1 rounded-full border border-brand-border">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-brand-navy/60">System Audit</h3>
+            <div className="text-[9px] font-black text-brand-navy/40 uppercase tracking-widest bg-brand-deep px-3 py-1 rounded-full border border-brand-border">
               {allSheets.length} Active Nodes
             </div>
           </div>
@@ -348,23 +377,23 @@ export default function AdminDashboard({ activeView }: { activeView?: string }) 
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="bg-slate-50 text-slate-500 text-[9px] uppercase font-bold tracking-widest border-b border-slate-200">
+                  <tr className="bg-slate-50 text-slate-600 text-[9px] uppercase font-bold tracking-widest border-b border-slate-200">
                     <th className="px-8 py-5">Node ID</th>
                     <th className="px-8 py-5">Status</th>
                     <th className="px-8 py-5">Protocol</th>
                     <th className="px-8 py-5 text-right">Emergency</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-700">
+                <tbody className="divide-y divide-slate-100 text-slate-800">
                   {allSheets.map((sheet, idx) => (
                     <motion.tr 
                       key={sheet.id}
                       initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.05 }}
-                      className="hover:bg-slate-50/50 transition-all font-medium"
+                      className="hover:bg-slate-50/50 transition-all font-semibold"
                     >
-                      <td className="px-8 py-6 font-mono text-[10px] text-slate-400">{sheet.employeeId}</td>
+                      <td className="px-8 py-6 font-mono text-[10px] text-slate-500">{sheet.employeeId}</td>
                       <td className="px-8 py-6">
                          <span className={cn(
                            "text-[9px] uppercase tracking-widest font-bold px-3 py-1 rounded-full border",
@@ -430,7 +459,7 @@ export default function AdminDashboard({ activeView }: { activeView?: string }) 
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-widest opacity-30">Primary Cycle ID</label>
+                <label className="text-[10px] font-black uppercase tracking-widest opacity-60">Primary Cycle ID</label>
                 <input 
                   type="text" 
                   value={config?.activeCycle || ""} 
@@ -440,7 +469,7 @@ export default function AdminDashboard({ activeView }: { activeView?: string }) 
                 />
               </div>
               <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-widest opacity-30">Active Quarter</label>
+                <label className="text-[10px] font-black uppercase tracking-widest opacity-60">Active Quarter</label>
                 <select 
                   value={config?.currentQuarter || "Q1"}
                   onChange={(e) => setConfig({ ...config, currentQuarter: e.target.value })}

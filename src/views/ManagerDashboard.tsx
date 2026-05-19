@@ -202,19 +202,19 @@ export default function ManagerDashboard({ activeView }: { activeView?: string }
           <h1 className="text-4xl font-serif font-black tracking-tight text-brand-navy leading-none">
             Team <span className="text-brand-violet">Pulse</span>
           </h1>
-          <p className="text-brand-navy/30 font-medium text-sm">Manage and review your team's tactical performance.</p>
+          <p className="text-brand-navy/60 font-medium text-sm">Manage and review your team's tactical performance.</p>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
           <div className="flex bg-white p-1 rounded-2xl border border-brand-border shadow-sm w-full sm:w-auto">
             <button 
               onClick={() => setActiveTab("team")}
-              className={cn("flex-1 sm:px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap", activeTab === "team" ? "bg-brand-lavender text-brand-violet shadow-sm" : "text-brand-navy/30 hover:text-brand-navy")}
+              className={cn("flex-1 sm:px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap", activeTab === "team" ? "bg-brand-lavender text-brand-violet shadow-sm" : "text-brand-navy/60 hover:text-brand-navy")}
             >
               Team Detail
             </button>
             <button 
               onClick={() => setActiveTab("kpis")}
-              className={cn("flex-1 sm:px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap", activeTab === "kpis" ? "bg-brand-lavender text-brand-violet shadow-sm" : "text-brand-navy/30 hover:text-brand-navy")}
+              className={cn("flex-1 sm:px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap", activeTab === "kpis" ? "bg-brand-lavender text-brand-violet shadow-sm" : "text-brand-navy/60 hover:text-brand-navy")}
             >
               Dept Shared KPIs
             </button>
@@ -243,8 +243,8 @@ export default function ManagerDashboard({ activeView }: { activeView?: string }
             {/* Team List */}
             <div className="lg:col-span-4 space-y-8">
                <div className="flex items-center justify-between px-2">
-                 <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-navy/30">Direct Reports</h3>
-                 <Users className="w-4 h-4 text-brand-navy/20" />
+                 <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-navy/60">Direct Reports</h3>
+                 <Users className="w-4 h-4 text-brand-navy/40" />
                </div>
                
                <div className="space-y-3">
